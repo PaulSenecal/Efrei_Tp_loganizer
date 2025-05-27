@@ -1,0 +1,1 @@
+Lecture des configurations JSON.
