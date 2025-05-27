@@ -2,6 +2,7 @@ package reporter
 
 import (
 	"encoding/json"
+	"fmt"
 	"loganalyzer/internal/analyzer"
 	"os"
 )
@@ -9,7 +10,7 @@ import (
 func ExportResults(results []analyzer.LogResult, outputPath string) error {
 	file, err := os.Create(outputPath)
 	if err != nil {
-		return err
+		return fmt.Errorf("échec de la création du fichier de sortie : %w", err)
 	}
 	defer file.Close()
 
