@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+
 	"github.com/spf13/cobra"
 )
 
@@ -34,7 +35,6 @@ type LogConfig struct {
 	Path string `json:"path"`
 	Type string `json:"type"`
 }
-
 type LogResult struct {
 	LogID        string `json:"log_id"`
 	FilePath     string `json:"file_path"`
@@ -97,12 +97,15 @@ log files to analyze, processes them concurrently, and outputs a report.`,
 				errorCount++
 				fmt.Printf("  Error: %s\n", result.ErrorDetails)
 			}
+
 		}
 
 		fmt.Printf("\nSummary: %d successful, %d errors\n", successCount, errorCount)
 
 		if outputPath != "" {
+
 			fmt.Printf("\nExporting results to %s\n", outputPath)
+
 			err := exportResults(outputPath, results)
 			if err != nil {
 				fmt.Printf("Error exporting results: %v\n", err)
@@ -224,6 +227,14 @@ func readConfigs(path string) ([]LogConfig, error) {
 }
 
 func exportResults(path string, results []LogResult) error {
+	dir := filepath.Dir(path)
+	if dir != "" {
+		err := os.MkdirAll(dir, 0755)
+		if err != nil {
+			return fmt.Errorf("could not create directory %q: %w", dir, err)
+		}
+	}
+
 	data, err := json.MarshalIndent(results, "", "  ")
 	if err != nil {
 		return fmt.Errorf("could not marshal results to JSON: %w", err)
@@ -231,7 +242,7 @@ func exportResults(path string, results []LogResult) error {
 
 	err = os.WriteFile(path, data, 0644)
 	if err != nil {
-		return fmt.Errorf("could not write results to file: %w", err)
+		return fmt.Errorf("could not write results to file %q: %w", path, err)
 	}
 	return nil
 }
