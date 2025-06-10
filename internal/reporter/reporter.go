@@ -13,6 +13,7 @@ type LogResult struct {
 	Status       string `json:"status"`
 	Message      string `json:"message"`
 	ErrorDetails string `json:"error_details"`
+	ProcessTime  string `json:"process_time"`
 }
 
 // ExportReport exporte les résultats d’analyse dans un fichier JSON
