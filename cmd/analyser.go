@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/spf13/cobra"
+
+	"Efrei_Tp_loganizer/internal/reporter"
 )
 
 type LogConfig struct {
@@ -55,12 +56,12 @@ log files to analyze, processes them, and outputs a report.`,
 
 		fmt.Printf("Successfully loaded %d log configurations from %s.\n", len(configs), configPath)
 
-		var results []LogResult
+		var results []reporter.LogResult
 
 		fmt.Println("\n--- Log Configurations to Analyze ---")
 		for _, cfg := range configs {
 			fmt.Printf("ID: %s, Path: %s, Type: %s\n", cfg.ID, cfg.Path, cfg.Type)
-			results = append(results, LogResult{
+			results = append(results, reporter.LogResult{
 				LogID:        cfg.ID,
 				FilePath:     cfg.Path,
 				Status:       "SIMULATED_OK",
@@ -71,7 +72,7 @@ log files to analyze, processes them, and outputs a report.`,
 
 		if outputPath != "" {
 			fmt.Printf("\nExporting analysis report to %s...\n", outputPath)
-			err := exportResults(outputPath, results)
+			err := reporter.ExportReport(outputPath, results)
 			if err != nil {
 				fmt.Printf("Error exporting results: %v\n", err)
 				os.Exit(1)
@@ -94,25 +95,4 @@ func readConfigs(path string) ([]LogConfig, error) {
 		return nil, fmt.Errorf("could not unmarshal config JSON: %w", err)
 	}
 	return configs, nil
-}
-
-func exportResults(path string, results []LogResult) error {
-	dir := filepath.Dir(path)
-	if dir != "" {
-		err := os.MkdirAll(dir, 0755)
-		if err != nil {
-			return fmt.Errorf("could not create directory %q: %w", dir, err)
-		}
-	}
-
-	data, err := json.MarshalIndent(results, "", "  ")
-	if err != nil {
-		return fmt.Errorf("could not marshal results to JSON: %w", err)
-	}
-
-	err = os.WriteFile(path, data, 0644)
-	if err != nil {
-		return fmt.Errorf("could not write results to file %q: %w", path, err)
-	}
-	return nil
 }
