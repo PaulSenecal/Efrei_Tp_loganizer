@@ -3,7 +3,10 @@ package reporter
 import (
 	"encoding/json"
 	"fmt"
-	"loganalyzer/internal/analyzer"
+
+	"github.com/PaulSenecal/Efrei_Tp_loganizer/internal/analyzer"
+
+	//"loganalyzer/internal/analyzer"
 	"os"
 )
 
