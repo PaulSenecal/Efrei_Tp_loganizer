@@ -1,1 +1,0 @@
-Export JSON des résultats.
