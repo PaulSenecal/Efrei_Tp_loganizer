@@ -1,6 +1,6 @@
-module tp_loganizer
+module Efrei_Tp_loganizer
 
-go 1.24.3
+go 1.22.0
 
 require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
