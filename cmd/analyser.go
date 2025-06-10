@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"Efrei_Tp_loganizer/internal/reporter"
 
 	"github.com/spf13/cobra"
 )
@@ -34,14 +35,6 @@ type LogConfig struct {
 	ID   string `json:"id"`
 	Path string `json:"path"`
 	Type string `json:"type"`
-}
-type LogResult struct {
-	LogID        string `json:"log_id"`
-	FilePath     string `json:"file_path"`
-	Status       string `json:"status"`
-	Message      string `json:"message"`
-	ErrorDetails string `json:"error_details"`
-	ProcessTime  string `json:"process_time"`
 }
 
 var (
@@ -103,22 +96,34 @@ log files to analyze, processes them concurrently, and outputs a report.`,
 		fmt.Printf("\nSummary: %d successful, %d errors\n", successCount, errorCount)
 
 		if outputPath != "" {
-
 			fmt.Printf("\nExporting results to %s\n", outputPath)
 
-			err := exportResults(outputPath, results)
+			var repResults []reporter.LogResult
+			for _, r := range results {
+				repResults = append(repResults, reporter.LogResult{
+					LogID:        r.LogID,
+					FilePath:     r.FilePath,
+					Status:       r.Status,
+					Message:      r.Message,
+					ErrorDetails: r.ErrorDetails,
+					ProcessTime:  r.ProcessTime,
+				})
+			}
+
+			err := reporter.ExportReport(outputPath, repResults)
 			if err != nil {
 				fmt.Printf("Error exporting results: %v\n", err)
 				os.Exit(1)
 			}
 			fmt.Println("Export complete.")
 		}
+
 	},
 }
 
-func AnalyzeLogs(configs []LogConfig) []LogResult {
+func AnalyzeLogs(configs []LogConfig) []reporter.LogResult {
 	var wg sync.WaitGroup
-	results := make(chan LogResult, len(configs))
+	results := make(chan reporter.LogResult, len(configs))
 
 	// Lancement des goroutines
 	for _, config := range configs {
@@ -136,7 +141,7 @@ func AnalyzeLogs(configs []LogConfig) []LogResult {
 		close(results)
 	}()
 
-	var logResults []LogResult
+	var logResults []reporter.LogResult
 	for result := range results {
 		logResults = append(logResults, result)
 	}
@@ -144,14 +149,14 @@ func AnalyzeLogs(configs []LogConfig) []LogResult {
 	return logResults
 }
 
-func analyzeLogFile(config LogConfig) LogResult {
+func analyzeLogFile(config LogConfig) reporter.LogResult {
 	//startTime := time.Now()
 
 	// Simulation du temps de traitement (50-200ms)
 	processingTime := time.Duration(50+rand.Intn(150)) * time.Millisecond
 	time.Sleep(processingTime)
 
-	result := LogResult{
+	result := reporter.LogResult{
 		LogID:       config.ID,
 		FilePath:    config.Path,
 		ProcessTime: processingTime.String(),
@@ -224,27 +229,6 @@ func readConfigs(path string) ([]LogConfig, error) {
 		return nil, fmt.Errorf("could not unmarshal config JSON: %w", err)
 	}
 	return configs, nil
-}
-
-func exportResults(path string, results []LogResult) error {
-	dir := filepath.Dir(path)
-	if dir != "" {
-		err := os.MkdirAll(dir, 0755)
-		if err != nil {
-			return fmt.Errorf("could not create directory %q: %w", dir, err)
-		}
-	}
-
-	data, err := json.MarshalIndent(results, "", "  ")
-	if err != nil {
-		return fmt.Errorf("could not marshal results to JSON: %w", err)
-	}
-
-	err = os.WriteFile(path, data, 0644)
-	if err != nil {
-		return fmt.Errorf("could not write results to file %q: %w", path, err)
-	}
-	return nil
 }
 
 // Fonction utilitaire pour vérifier les types d'erreurs avec errors.Is()
