@@ -142,7 +142,7 @@ func AnalyzeLogs(configs []LogConfig) []LogResult {
 }
 
 func analyzeLogFile(config LogConfig) LogResult {
-	startTime := time.Now()
+	//startTime := time.Now()
 
 	// Simulation du temps de traitement (50-200ms)
 	processingTime := time.Duration(50+rand.Intn(150)) * time.Millisecond

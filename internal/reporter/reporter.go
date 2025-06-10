@@ -4,9 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/PaulSenecal/Efrei_Tp_loganizer/internal/analyzer"
-
-	//"loganalyzer/internal/analyzer"
+	"loganalyzer/internal/analyzer"
 	"os"
 )
 
