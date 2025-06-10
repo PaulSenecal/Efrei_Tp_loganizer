@@ -1,10 +1,10 @@
 package reporter
 
 import (
+	"Efrei_Tp_loganizer/cmd/analyzer"
 	"encoding/json"
 	"fmt"
 
-	"loganalyzer/internal/analyzer"
 	"os"
 )
 
