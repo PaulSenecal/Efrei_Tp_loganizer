@@ -1,21 +1,37 @@
 package reporter
 
 import (
-	"Efrei_Tp_loganizer/cmd/analyzer"
 	"encoding/json"
 	"fmt"
-
 	"os"
+	"path/filepath"
 )
 
-func ExportResults(results []analyzer.LogResult, outputPath string) error {
-	file, err := os.Create(outputPath)
-	if err != nil {
-		return fmt.Errorf("échec de la création du fichier de sortie : %w", err)
-	}
-	defer file.Close()
+type LogResult struct {
+	LogID        string `json:"log_id"`
+	FilePath     string `json:"file_path"`
+	Status       string `json:"status"`
+	Message      string `json:"message"`
+	ErrorDetails string `json:"error_details"`
+}
 
-	encoder := json.NewEncoder(file)
-	encoder.SetIndent("", "  ")
-	return encoder.Encode(results)
+// ExportReport exporte les résultats d’analyse dans un fichier JSON
+func ExportReport(outputPath string, results []LogResult) error {
+	dir := filepath.Dir(outputPath)
+	if dir != "" && dir != "." {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return fmt.Errorf("could not create directory %q: %w", dir, err)
+		}
+	}
+
+	data, err := json.MarshalIndent(results, "", "  ")
+	if err != nil {
+		return fmt.Errorf("could not marshal results to JSON: %w", err)
+	}
+
+	if err := os.WriteFile(outputPath, data, 0644); err != nil {
+		return fmt.Errorf("could not write results to file %q: %w", outputPath, err)
+	}
+
+	return nil
 }
